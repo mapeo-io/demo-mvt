@@ -1,0 +1,28 @@
+services:
+  mvt_db:
+    image: postgis/postgis:16-3.4-alpine
+    env_file:
+      - 'environment/local.env'
+    volumes:
+      - 'demo_mvt_db:/var/lib/postgresql'
+    networks:
+      - demo_mvt
+
+  mvt_django:
+    build:
+      context: .
+      dockerfile: dockerfiles/django.dockerfile
+    env_file:
+      - 'environment/local.env'
+    ports:
+      - '8000:8000'
+    networks:
+      - demo_mvt
+    depends_on:
+      - mvt_db
+
+volumes:
+  demo_mvt_db:
+
+networks:
+  demo_mvt:

@@ -1,0 +1,67 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.3.0/ol.css">
+
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        const token = Cookies.get('token');
+        const mvtLayer = new ol.layer.VectorTile({
+            source: new ol.source.VectorTile({
+                format: new ol.format.MVT(),
+                url: `/mvt/${token}/{z}/{x}/{y}`
+            }),
+            style: function (feature, resolution) {
+                // Calculate zoom level based on resolution
+                const zoom = Math.round(Math.log2(156543.03390625 / resolution));
+                if (zoom < 10) {
+                    return null;
+                }
+                // Get the 'status' attribute of the feature
+                const status = feature.get('status');
+                let strokeColor = '#3a3737';
+                if (status === 'new') {
+                    strokeColor = '#c4c9c4';
+                } else if (status === 'visited') {
+                    strokeColor = '#ffe271';
+                } else if (status === 'wants') {
+                    strokeColor = '#69c95d';
+                } else if (status === 'dont') {
+                    strokeColor = '#da3764';
+                } else if (status === 'bought') {
+                    strokeColor = '#3b94e0';
+                }
+                return new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: strokeColor,
+                        width: 2
+                    }),
+                });
+            }
+        });
+        const map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM(),
+                }),
+                mvtLayer,
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: [2301119, 6822814],
+                zoom: 13,
+            }),
+        });
+    </script>
+</body>
+</html>

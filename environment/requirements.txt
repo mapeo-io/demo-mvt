@@ -1,0 +1,7 @@
+requests
+Django
+djangorestframework
+djoser==2.3.1
+tzdata
+pyproj
+psycopg2-binary

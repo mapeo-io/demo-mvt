@@ -1,0 +1,59 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MVT demo</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+</head>
+<body>
+    <div class="fill-screen d-flex">
+        <form id="loginForm" class="login-modal flex d-flex flex-col" >
+             {% csrf_token %}
+            <h1>Login</h1>
+
+            <label for="email">e-mail</label>
+            <input id="email" name="email" type="text" autocomplete="off">
+
+            <label for="password">password</label>
+            <input id="password" name="password" type="password">
+
+            <button type="submit">login</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+
+            event.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                const response = await fetch('/auth/token/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    Cookies.set('token', data.auth_token, { sameSite: 'strict' })
+                    window.location.href = '/map';
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.detail || 'Invalid login credentials.');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred. Please try again later.');
+            }
+        });
+    </script>
+</body>
+</html>
